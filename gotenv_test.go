@@ -495,3 +495,19 @@ QUOTED="some \"quoted\" text"`
 	assert.Nil(t, err)
 	assert.Equal(t, env, out)
 }
+
+func TestMarshalNonCanonicalInteger(t *testing.T) {
+	// Leading zeros and explicit signs must stay quoted, or the value changes
+	// on round-trip.
+	env := gotenv.Env{
+		"PADDED": "007",
+		"SIGNED": "+5",
+		"PLAIN":  "5",
+	}
+	out, err := gotenv.Marshal(env)
+	assert.Nil(t, err)
+
+	back, err := gotenv.Unmarshal(out)
+	assert.Nil(t, err)
+	assert.Equal(t, env, back)
+}

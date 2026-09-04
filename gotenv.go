@@ -148,7 +148,9 @@ func Unmarshal(str string) (Env, error) {
 func Marshal(env Env) (string, error) {
 	lines := make([]string, 0, len(env))
 	for k, v := range env {
-		if d, err := strconv.Atoi(v); err == nil {
+		// Only canonical integers may go unquoted; "007" or "+5" would be
+		// rewritten and would not survive a round-trip.
+		if d, err := strconv.Atoi(v); err == nil && strconv.Itoa(d) == v {
 			lines = append(lines, fmt.Sprintf(`%s=%d`, k, d))
 		} else {
 			lines = append(lines, fmt.Sprintf(`%s=%q`, k, v))
